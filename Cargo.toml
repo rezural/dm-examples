@@ -27,8 +27,8 @@ rand = "0.7.3"
 #rapier3d = { version = "0.4.0", features = [  ] }
 #rapier_testbed3d = { version = "0.4.0" , features = [  ] }
 
-salva3d = { path = "vendor/salva/build/salva3d", features = [ "sampling", "rapier", "rapier-harness" ] }
-rapier3d = { path = "vendor/rapier/build/rapier3d", features = [  ] }
+salva3d = { path = "vendor/salva/build/salva3d", features = [ "sampling", "rapier" ] }
+rapier3d = { path = "vendor/rapier/build/rapier3d" }
 rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d" }
 
 nalgebra = { version = "0.23.2", features = [ "serde-serialize" ] }

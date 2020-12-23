@@ -722,7 +722,7 @@ dependencies = [
  "ply-rs",
  "rand",
  "rapier3d 0.4.2",
- "rapier_testbed3d 0.4.0",
+ "rapier_testbed3d",
  "rayon",
  "salva3d",
  "serde",
@@ -2064,7 +2064,6 @@ dependencies = [
  "bitflags",
  "crossbeam",
  "downcast-rs",
- "erased-serde",
  "generational-arena",
  "instant",
  "nalgebra",
@@ -2072,7 +2071,6 @@ dependencies = [
  "num-derive",
  "num-traits",
  "rustc-hash",
- "serde",
  "simba",
  "vec_map",
 ]
@@ -2094,28 +2092,6 @@ dependencies = [
  "rand",
  "rand_pcg",
  "rapier3d 0.4.2",
- "serde",
- "serde_cbor",
-]
-
-[[package]]
-name = "rapier_testbed3d"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0bc894f7bb1111e4ef4a112f0087572de3ca5a73cd7ce5d8371d302aa646f151"
-dependencies = [
- "Inflector",
- "bincode",
- "bitflags",
- "crossbeam",
- "instant",
- "kiss3d",
- "md5",
- "nalgebra",
- "ncollide3d",
- "rand",
- "rand_pcg",
- "rapier3d 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde",
  "serde_cbor",
 ]
@@ -2258,12 +2234,10 @@ dependencies = [
  "generational-arena",
  "instant",
  "itertools",
- "kiss3d",
  "nalgebra",
  "ncollide3d",
  "num-traits",
  "rapier3d 0.4.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "rapier_testbed3d 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rayon",
 ]
 
