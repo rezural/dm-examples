@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
 extern crate dm_examples;
 
-use na::{ComplexField, DMatrix, Point3, Vector3};
+use na::{Point3, Vector3};
 use rapier3d::dynamics::{JointSet, RigidBodySet};
 use rapier3d::geometry::{ColliderSet};
 use rapier_testbed3d::Testbed;
@@ -28,39 +28,40 @@ pub fn init_world(testbed: &mut Testbed) {
     let mut fluids_pipeline = FluidsPipeline::new(PARTICLE_RADIUS, SMOOTHING_FACTOR);
 
     // Initialize the fluid.
-    let viscosity = XSPHViscosity::new(0.5, 0.0);
-    let tension = Akinci2013SurfaceTension::new(0.5, 2.);
+    let viscosity = XSPHViscosity::new(0.2, 0.0);
+    let tension = Akinci2013SurfaceTension::new(0.2, 0.2);
     let mut fluid = Fluid::new(Vec::new(), PARTICLE_RADIUS, 1000.0);
     fluid.nonpressure_forces.push(Box::new(viscosity));
     fluid.nonpressure_forces.push(Box::new(tension));
     let fluid_handle = fluids_pipeline.liquid_world.add_fluid(fluid);
     plugin.set_fluid_color(fluid_handle, Point3::new(0.5, 1.0, 1.0));
 
-    let wall_height = 0.;
-    let subdiv = 4;
-    let ground_size = Vector3::new(10., 1., 10.);
-    let subdivs = Vector3::new(ground_size.x as usize * subdiv, 0, ground_size.z as usize * subdiv);
+    let height_multiplier = 1.;
+    let ground_size = Vector3::new(20., 10., 20.);
 
-    let heights = DMatrix::from_fn(subdivs.x + 1, subdivs.z + 1, |i, j| {
-        if i == 0 || i == subdivs.x || j == 0 || j == subdivs.z {
-            wall_height
-        } else {
-            let x = i as f32 * ground_size.x / (subdivs.x as f32 / 2.);
-            let z = j as f32 * ground_size.z / (subdivs.z as f32 / 2.);
+    let heightfield_file = String::from("assets/heightmaps/basicmulti.json");
+    let heightfield_data = std::fs::read_to_string(heightfield_file).unwrap();
+    let heightfield: Vec<Vec<f32>> = serde_json::from_str(heightfield_data.as_str()).unwrap();
 
-            // NOTE: make sure we use the sin/cos from simba to ensure
-            // cross-platform determinism of the example when the
-            // enhanced_determinism feature is enabled.
-            (<f32 as ComplexField>::sin(x) + <f32 as ComplexField>::cos(z)) / 4.
-        }
-    });
-        let (ground_handle, _ground_shape) = heightfield::generate_ground(
-            ground_size,
-            heights,
-            PARTICLE_RADIUS,
-            &mut fluids_pipeline,
-            &mut bodies,
-            &mut colliders);
+    let mut heightfield_flat: Vec<f32> = heightfield.clone()
+        .iter()
+        .flatten()
+        .cloned()
+        .collect();
+    
+    heightfield_flat.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    let highest_point = heightfield_flat.last().unwrap().clone();
+    let lowest_point = heightfield_flat.first().unwrap().clone();
+
+    let heightfield_matrix = heightfield::dmatrix_from_heightfield(heightfield.clone(), lowest_point, height_multiplier);
+
+    let (ground_handle, _ground_shape) = heightfield::generate_ground(
+        ground_size,
+        heightfield_matrix,
+        PARTICLE_RADIUS * 1.2,
+        &mut fluids_pipeline,
+        &mut bodies,
+        &mut colliders);
 
     // Callback that will be executed on the main loop to generate new particles every second.
     let mut last_t = 0.0;
@@ -84,9 +85,9 @@ pub fn init_world(testbed: &mut Testbed) {
         }
 
         last_t = t;
-        let height = 2.0;
         let diam = PARTICLE_RADIUS * 2.0;
         let nparticles = 40;
+        let particles_translation = Vector3::new(-1.5, highest_point * ground_size.y, -1.5);
         let mut particles = Vec::new();
         let mut velocities = Vec::new();
         let shift = -nparticles as f32 * PARTICLE_RADIUS;
@@ -94,8 +95,8 @@ pub fn init_world(testbed: &mut Testbed) {
 
         for i in 0..nparticles {
             for j in 0..nparticles {
-                let pos = Point3::new(i as f32 * diam, height, j as f32 * diam);
-                particles.push(pos + Vector3::new(shift, 0.0, shift));
+                let pos = Point3::new(i as f32 * diam, 0., j as f32 * diam);
+                particles.push(pos + Vector3::new(shift, 0.0, shift) + particles_translation);
                 velocities.push(Vector3::y() * vel);
             }
         }
@@ -112,7 +113,7 @@ pub fn init_world(testbed: &mut Testbed) {
     testbed.set_world_with_gravity(bodies, colliders, joints, gravity);
     testbed.integration_parameters_mut().set_dt(1.0 / 200.0);
     //    testbed.enable_boundary_particles_rendering(true);
-    testbed.look_at(Point3::new(1.5, 2.0, 10.), Point3::new(0.0, 0.0, 0.0));
+    testbed.look_at(Point3::new(1.5, highest_point, 10.), Point3::new(0.0, 0.0, 0.0));
 }
 
 fn main() {
