@@ -5,7 +5,9 @@ authors = ["rezural <rezural@protonmail.com>"]
 edition = "2018"
 
 [features]
-parallel = [ "salva3d/parallel", "rapier3d/parallel", "rapier_testbed3d/parallel"]
+default = [ "salva3d/sampling", "salva3d/rapier", "salva3d/rapier-harness" ]
+parallel = [ "salva3d/parallel", "rapier3d/parallel", "rapier_testbed3d/parallel" ]
+profile = [ "coarse-prof", "rapier_testbed3d/profile" ]
 
 [dependencies]
 uuid = { version = "0.8", features = ["serde", "v4"] }
@@ -22,23 +24,19 @@ kiss3d = "0.28"
 glob = "0.3.0"
 alphanumeric-sort = "1.4.0"
 rand = "0.7.3"
-
 nalgebra = { version = "0.23.2", features = [ "serde-serialize" ] }
-#ncollide3d = "0.26.1"
-#splashsurf_lib = "0.3"
-#anyhow = "1.0.35"
-#vtkio = "0.5.0"
+ncollide3d = "0.26.1"
 
-salva3d = { version = "0.5,0", features = [ "sampling", "rapier", "rapier-harness" ] }
+salva3d = { version = "0.5,0" }
 rapier3d = { version = "0.4.0" }
 rapier_testbed3d = { version = "0.4.0" }
-ncollide3d = "0.26.1"
-# salva3d = { path = "vendor/salva/build/salva3d", features = [ "sampling", "rapier", "rapier-harness" ] }
-# rapier3d = { path = "vendor/rapier/build/rapier3d" }
-# rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d" }
-#
-#
+coarse-prof = { version = "0.2.4", optional = true}
+
 [patch.crates-io]
 salva3d = { path = "vendor/salva/build/salva3d" }
 rapier3d = { path = "vendor/rapier/build/rapier3d" }
 rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d" }
+
+# rapier3d = { git = "https://github.com/rezural/rapier.git", branch = "harness-testbed-integration"}
+# rapier_testbed3d = { git = "https://github.com/rezural/rapier.git", branch = "harness-testbed-integration"}
+# salva3d = { git = "https://github.com/rezural/salva.git", branch = "rapier-harness"}
