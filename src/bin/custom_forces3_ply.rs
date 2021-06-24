@@ -13,7 +13,7 @@ use rapier3d::geometry::{ColliderSet};
 use rapier_testbed3d::harness::{Harness, RunState};
 use salva3d::{integrations::rapier::{FluidsHarnessPlugin, FluidsPipeline}, object::Boundary};
 use salva3d::object::{Fluid};
-use salva3d::solver::{Akinci2013SurfaceTension, XSPHViscosity};
+use salva3d::solver::{XSPHViscosity};
 use std::{f32, path::PathBuf};
 
 use salva3d::solver::NonPressureForce;

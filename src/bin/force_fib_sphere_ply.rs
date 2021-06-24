@@ -8,7 +8,7 @@ extern crate coarse_prof;
 use dm_examples::external_structs::fib_sphere::{StateHistory};
 use dm_examples::io::ply::output_particles_to_file;
 use dm_examples::run::Manager;
-use na::{Isometry3, Point3, Unit, Vector3};
+use na::{Isometry3, Point3, Vector3};
 use rapier3d::dynamics::{JointSet, RigidBodySet};
 use rapier3d::geometry::{ColliderSet};
 use rapier_testbed3d::harness::{Harness, RunState};
@@ -139,7 +139,7 @@ impl NonPressureForce for CustomForceField {
                 })
                 .collect();
             for point in points {
-                let vec = (point - pos);
+                let vec = point - pos;
                 *acc = *acc + vec;
             }
         }

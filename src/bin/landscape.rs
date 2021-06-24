@@ -13,7 +13,7 @@ use rapier_testbed3d::harness::RunState;
 use rapier_testbed3d::Testbed;
 use salva3d::integrations::rapier::{FluidsPipeline, FluidsTestbedPlugin};
 use salva3d::object::{Fluid};
-use salva3d::solver::{Akinci2013SurfaceTension, XSPHViscosity};
+use salva3d::solver::{XSPHViscosity};
 use std::{f32, path::PathBuf};
 
 use dm_examples::generators::heightfield;
@@ -72,7 +72,6 @@ pub fn init_world(testbed: &mut Testbed) {
 
 
     let fg_extents = Vector3::new(3., 1., 3.);
-    let fluid_generator_cuboid = ncollide3d::shape::Cuboid::new(fg_extents);
     let fluid_generator_pose = Isometry3::translation(-ground_size.x * 0.29, highest_point * ground_size.y - 5.5, -ground_size.z * 0.34);
     // Callback that will be executed on the main loop to generate new particles every second.
     let mut last_t = -0.7;
@@ -157,7 +156,7 @@ pub fn init_world(testbed: &mut Testbed) {
 
 fn main() {
 
-    let mut testbed = Testbed::from_builders(0, vec![("Landscape", init_world)]);
+    let testbed = Testbed::from_builders(0, vec![("Landscape", init_world)]);
     {
         // #[cfg(feature = "profile")]
         // testbed.harness_mut().set_max_steps(10);

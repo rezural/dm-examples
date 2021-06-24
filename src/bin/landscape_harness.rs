@@ -5,15 +5,14 @@ extern crate rapier_testbed3d;
 #[cfg(feature = "profile")]
 extern crate coarse_prof;
 
-use na::{Isometry3, Point3, Vector3};
+use na::{Isometry3, Vector3};
 use ncollide3d::query::Ray;
 use rapier3d::dynamics::{JointSet, RigidBodySet};
 use rapier3d::geometry::{ColliderSet};
 use rapier_testbed3d::harness::{Harness, RunState};
-use rapier_testbed3d::Testbed;
-use salva3d::integrations::rapier::{FluidsHarnessPlugin, FluidsPipeline, FluidsTestbedPlugin};
+use salva3d::integrations::rapier::{FluidsHarnessPlugin, FluidsPipeline};
 use salva3d::object::{Fluid};
-use salva3d::solver::{Akinci2013SurfaceTension, XSPHViscosity};
+use salva3d::solver::{XSPHViscosity};
 use std::{f32, path::PathBuf};
 
 use dm_examples::generators::heightfield;
@@ -58,7 +57,7 @@ pub fn init_world(harness: &mut Harness) {
 
     let heightfield_matrix = heightfield::dmatrix_from_heightfield(heightfield.clone(), lowest_point, height_multiplier);
 
-    let (ground_handle, ground_shape) = heightfield::generate_ground(
+    let (_, ground_shape) = heightfield::generate_ground(
         ground_size,
         heightfield_matrix,
         PARTICLE_RADIUS * 1.2,
@@ -68,7 +67,6 @@ pub fn init_world(harness: &mut Harness) {
 
 
     let fg_extents = Vector3::new(3., 1., 3.);
-    let fluid_generator_cuboid = ncollide3d::shape::Cuboid::new(fg_extents);
     let fluid_generator_pose = Isometry3::translation(-ground_size.x * 0.29, highest_point * ground_size.y - 5.5, -ground_size.z * 0.34);
     // Callback that will be executed on the main loop to generate new particles every second.
     let mut last_t = -0.7;
@@ -116,31 +114,10 @@ pub fn init_world(harness: &mut Harness) {
 
         fluid.add_particles(&volume, None);
 
-        println!("saving particles");
         let to_file = format!("tmp/particles-{}.ply", run_state.timestep_id);
         let to_file = PathBuf::from(to_file);
         dm_examples::io::ply::output_particles_to_file(fluid, &to_file);
-        println!("done");
 
-        // let diam = PARTICLE_RADIUS * 2.0;
-        // let nparticles = 10;
-        // let particles_translation = Vector3::new(-ground_size.x * 0.29, highest_point * ground_size.y - 5.5, -ground_size.z * 0.34);
-        // let mut particles = Vec::new();
-        // let mut velocities = Vec::new();
-        // let shift = -nparticles as f32 * PARTICLE_RADIUS;
-        // let vel = 0.0;
-
-        // for i in 0..nparticles {
-        //     for j in 0..nparticles {
-        //         for k in 0..nparticles {
-        //             let pos = Point3::new(i as f32 * diam, j as f32 * diam * 2., k as f32 * diam);
-        //             particles.push(pos + Vector3::new(shift, 0.0, shift) + particles_translation);
-        //             velocities.push(Vector3::y() * vel);
-        //         }
-        //     }
-        // }
-
-        // fluid.add_particles(&particles, Some(&velocities));
     });
 
     /*
