@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'fileutils'
+require 'pry'
+require 'toml'
+require 'natural_sort_kernel'
+
+dir = Pathname.new ARGV[0].to_s
+# particle_radius = ARGV[1].to_s
+splash_surf_bin = "./splashsurf"
+particles_path = dir.join('particles')
+surfaces_path = dir.join('surfaces')
+# debug_output_dir = surfaces_path.join('verbose')
+# log_file = dir.join("splashsurf.log")
+
+config_file = dir.join("config.toml")
+config = TOML.load_file(config_file.to_s)
+
+particle_radius = (ARGV[2] || config["particle_radius"]).to_f
+
+FileUtils.mkdir_p surfaces_path
+
+#just keep running
+loop do
+    input_files = Dir[particles_path.join('*.ply')]
+    input_files = input_files.natural_sort
+
+    debug_options = ""
+
+    # puts input_files.inspect
+
+    input_files.each do |input_file|
+        input_file_bare = File.basename input_file
+        output_file = surfaces_path.join("#{input_file_bare}.obj")
+        cmd = "#{splash_surf_bin} reconstruct -i #{input_file} -o #{output_file} --particle-radius=#{particle_radius * 1.0} --smoothing-length=2.0 --cube-size=1.5  --mt-particles --output-normals on #{debug_options}"
+        if !File.exists?(output_file)
+            # puts cmd
+            puts "surfacing #{input_file} to #{output_file}"
+            # puts cmd
+            output = `#{cmd} `
+        end
+    end
+    puts "finished"
+    sleep(10 * 1)
+    puts "retrying"
+end

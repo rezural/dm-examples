@@ -2,3 +2,6 @@
 vendor/
 target/
 tmp
+runs
+assets
+splashsurf

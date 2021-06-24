@@ -56,7 +56,7 @@ pub fn output_particles_to_file(fluid: &Fluid, to_file: &path::PathBuf) {
 
 fn create_ply() -> Ply<DefaultElement> {
     let mut ply = Ply::<DefaultElement>::new();
-    ply.header.encoding = Encoding::Ascii;
+    ply.header.encoding = Encoding::BinaryBigEndian;
     ply.header.comments.push("A beautiful comment!".to_string());
     let mut point_element = ElementDef::new("vertex".to_string());
     let p = PropertyDef::new("x".to_string(), PropertyType::Scalar(ScalarType::Float));
