@@ -20,7 +20,7 @@ use std::{f32, path::PathBuf};
 
 use salva3d::solver::NonPressureForce;
 
-const PARTICLE_RADIUS: f32 = 0.02;
+const PARTICLE_RADIUS: f32 = 0.12;
 const SMOOTHING_FACTOR: f32 = 2.0;
 
 pub fn init_world(harness: &mut Harness) {
@@ -73,11 +73,11 @@ pub fn init_world(harness: &mut Harness) {
             .get(fluid_handle)
             .unwrap();
 
-        println!("saving particles");
+        // println!("saving particles");
         let to_file = run.particles_full_path().join(format!("particles-{}.ply", run_state.timestep_id));
         let to_file = PathBuf::from(to_file);
         output_particles_to_file(fluid, &to_file);
-        println!("done");
+        // println!("done");
 
     });
 
@@ -119,8 +119,8 @@ impl NonPressureForce for CustomForceField {
         _densities: &[f32],
     ) {
         let ts = Instant::now() - self.start;
-        let mut state = self.history.get(self.current_state).unwrap();
-        let next_state = self.history.get(self.current_state + 1);
+        let mut state = self.history.history.get(self.current_state).unwrap();
+        let next_state = self.history.history.get(self.current_state + 1);
 
         if ts > state.time_offset {
             if let Some(next_state) = next_state {
@@ -139,9 +139,8 @@ impl NonPressureForce for CustomForceField {
                 })
                 .collect();
             for point in points {
-                if let Some((dir, dist)) = Unit::try_new_and_get(point - pos, 0.1) {
-                    *acc += *dir / (dist / 2.);
-                }
+                let vec = (point - pos);
+                *acc = *acc + vec;
             }
         }
     }

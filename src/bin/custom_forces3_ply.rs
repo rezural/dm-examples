@@ -38,7 +38,7 @@ pub fn init_world(harness: &mut Harness) {
     let custom_force2 = CustomForceField {
         origin: Point3::new(-1.0, 0.0, 0.0),
     };
-    let extents = Vector3::new(3., 1., 3.);
+    let extents = Vector3::new(3., 3., 3.);
     let pose = Isometry3::translation(0., 0., 0.);
 
     let volume = dm_examples::generators::fluid::volume_of_liquid(
