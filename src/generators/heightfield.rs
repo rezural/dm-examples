@@ -39,7 +39,7 @@ pub fn generate_ground<'a>(
     let ball_samples =
         salva3d::sampling::shape_surface_ray_sample(ground_shape.shape(), sample_radius).unwrap();
 
-    let co_handle = colliders.insert(ground_shape, ground_handle, bodies);
+    let co_handle = colliders.insert_with_parent(ground_shape, ground_handle, bodies);
     let bo_handle = fluids_pipeline
         .liquid_world
         .add_boundary(Boundary::new(Vec::new()));

@@ -63,8 +63,8 @@ pub fn init_world(harness: &mut Harness) {
         &mut colliders,
     );
 
-    let ground_collider = colliders.get(collider_handle);
-    let ground_shape = ground_collider.unwrap().shape();
+    // let ground_collider = colliders.get(collider_handle).clone();
+    // let ground_shape = ground_collider.unwrap().shape().clone();
 
     let fg_extents = Vector3::new(3., 1., 3.);
     let fluid_generator_pose = Isometry3::translation(
@@ -115,7 +115,8 @@ pub fn init_world(harness: &mut Harness) {
                 |point| {
                     let ray =
                         Ray::new(point - Vector3::y() * (PARTICLE_RADIUS * 4.), -Vector3::y());
-                    ground_shape.intersects_ray(&Isometry3::identity(), &ray, 10000.)
+                    // ground_shape.intersects_ray(&Isometry3::identity(), &ray, 10000.)
+                    true
                 },
             );
 
@@ -132,7 +133,7 @@ pub fn init_world(harness: &mut Harness) {
      */
     plugin.set_pipeline(fluids_pipeline);
     harness.add_plugin(plugin);
-    harness.set_world_with_gravity(bodies, colliders, joints, gravity);
+    harness.set_world_with_params(bodies, colliders, joints, gravity, ());
     harness.integration_parameters_mut().set_dt(1.0 / 300.0);
 }
 

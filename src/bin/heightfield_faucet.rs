@@ -4,7 +4,7 @@ extern crate nalgebra as na;
 use na::{ComplexField, DMatrix, Point3, Vector3};
 use rapier3d::dynamics::{JointSet, RigidBodySet};
 use rapier3d::geometry::ColliderSet;
-use rapier_testbed3d::Testbed;
+use rapier_testbed3d::{Testbed, TestbedApp};
 use salva3d::integrations::rapier::{FluidsPipeline, FluidsTestbedPlugin};
 use salva3d::object::Fluid;
 use salva3d::solver::{Akinci2013SurfaceTension, XSPHViscosity};
@@ -70,7 +70,7 @@ pub fn init_world(testbed: &mut Testbed) {
     // Callback that will be executed on the main loop to generate new particles every second.
     let mut last_t = 0.0;
 
-    plugin.add_callback(move |_, _, fluids_pipeline, run_state| {
+    plugin.add_callback(move |_, fluids_pipeline, run_state| {
         let fluid = fluids_pipeline
             .liquid_world
             .fluids_mut()
@@ -115,13 +115,13 @@ pub fn init_world(testbed: &mut Testbed) {
     testbed.add_plugin(plugin);
 
     testbed.set_body_wireframe(ground_handle, true);
-    testbed.set_world_with_gravity(bodies, colliders, joints, gravity);
+    testbed.set_world_with_params(bodies, colliders, joints, gravity, ());
     testbed.integration_parameters_mut().set_dt(1.0 / 200.0);
     //    testbed.enable_boundary_particles_rendering(true);
     testbed.look_at(Point3::new(1.5, 2.0, 10.), Point3::new(0.0, 0.0, 0.0));
 }
 
 fn main() {
-    let testbed = Testbed::from_builders(0, vec![("Boxes", init_world)]);
+    let testbed = TestbedApp::from_builders(0, vec![("Boxes", init_world)]);
     testbed.run()
 }

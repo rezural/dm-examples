@@ -1,19 +1,22 @@
-extern crate nalgebra as na;
-extern crate dm_examples;
-extern crate rapier3d;
-extern crate rapier_testbed3d;
 #[cfg(feature = "profile")]
 extern crate coarse_prof;
+extern crate dm_examples;
+extern crate nalgebra as na;
+extern crate rapier3d;
+extern crate rapier_testbed3d;
 
 use dm_examples::io::ply::output_particles_to_file;
 use dm_examples::run::Manager;
 use na::{Isometry3, Point3, Unit, Vector3};
 use rapier3d::dynamics::{JointSet, RigidBodySet};
-use rapier3d::geometry::{ColliderSet};
+use rapier3d::geometry::ColliderSet;
 use rapier_testbed3d::harness::{Harness, RunState};
-use salva3d::{integrations::rapier::{FluidsHarnessPlugin, FluidsPipeline}, object::Boundary};
-use salva3d::object::{Fluid};
-use salva3d::solver::{XSPHViscosity};
+use salva3d::object::Fluid;
+use salva3d::solver::XSPHViscosity;
+use salva3d::{
+    integrations::rapier::{FluidsHarnessPlugin, FluidsPipeline},
+    object::Boundary,
+};
 use std::{f32, path::PathBuf};
 
 use salva3d::solver::NonPressureForce;
@@ -42,13 +45,14 @@ pub fn init_world(harness: &mut Harness) {
     let pose = Isometry3::translation(0., 0., 0.);
 
     let volume = dm_examples::generators::fluid::volume_of_liquid(
-        extents.x * 2., 
-        extents.z * 2., 
-        extents.y * 2., 
-        PARTICLE_RADIUS, 
-        pose.translation, 
-        |_| true);
-    
+        extents.x * 2.,
+        extents.z * 2.,
+        extents.y * 2.,
+        PARTICLE_RADIUS,
+        pose.translation,
+        |_| true,
+    );
+
     let mut fluid = Fluid::new(volume, PARTICLE_RADIUS, 1000.);
     fluid.nonpressure_forces.push(Box::new(custom_force1));
     fluid.nonpressure_forces.push(Box::new(custom_force2));
@@ -58,27 +62,30 @@ pub fn init_world(harness: &mut Harness) {
     let run = Manager::new(None, PathBuf::from("./runs"));
     run.create_path(run.particles_full_path());
 
-    plugin.add_callback(move |_, _, fluids_pipeline: &mut FluidsPipeline, run_state: &RunState| {
-        let fluid = fluids_pipeline
-            .liquid_world
-            .fluids_mut()
-            .get(fluid_handle)
-            .unwrap();
+    plugin.add_callback(
+        move |_, _, fluids_pipeline: &mut FluidsPipeline, run_state: &RunState| {
+            let fluid = fluids_pipeline
+                .liquid_world
+                .fluids_mut()
+                .get(fluid_handle)
+                .unwrap();
 
-        println!("saving particles");
-        let to_file = run.particles_full_path().join(format!("particles-{}.ply", run_state.timestep_id));
-        let to_file = PathBuf::from(to_file);
-        output_particles_to_file(fluid, &to_file);
-        println!("done");
-
-    });
+            println!("saving particles");
+            let to_file = run
+                .particles_full_path()
+                .join(format!("particles-{}.ply", run_state.timestep_id));
+            let to_file = PathBuf::from(to_file);
+            output_particles_to_file(fluid, &to_file);
+            println!("done");
+        },
+    );
 
     /*
      * Set up the harness.
      */
     plugin.set_pipeline(fluids_pipeline);
     harness.add_plugin(plugin);
-    harness.set_world_with_gravity(bodies, colliders, joints, gravity);
+    harness.set_world_with_params(bodies, colliders, joints, gravity, ());
     harness.integration_parameters_mut().set_dt(1.0 / 300.0);
 }
 
@@ -91,7 +98,6 @@ fn main() {
     #[cfg(feature = "profile")]
     coarse_prof::write(&mut std::io::stdout()).unwrap();
 }
-
 
 struct CustomForceField {
     origin: Point3<f32>,
