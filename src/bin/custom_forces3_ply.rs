@@ -58,7 +58,7 @@ pub fn init_world(harness: &mut Harness) {
     let run = Manager::new(None, PathBuf::from("./runs"));
     run.create_path(run.particles_full_path());
 
-    plugin.add_callback(move |_, _, fluids_pipeline: &mut FluidsPipeline, run_state: &RunState, _ | {
+    plugin.add_callback(move |_, _, fluids_pipeline: &mut FluidsPipeline, run_state: &RunState| {
         let fluid = fluids_pipeline
             .liquid_world
             .fluids_mut()

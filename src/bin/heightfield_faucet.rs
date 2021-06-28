@@ -1,12 +1,12 @@
-extern crate nalgebra as na;
 extern crate dm_examples;
+extern crate nalgebra as na;
 
 use na::{ComplexField, DMatrix, Point3, Vector3};
 use rapier3d::dynamics::{JointSet, RigidBodySet};
-use rapier3d::geometry::{ColliderSet};
+use rapier3d::geometry::ColliderSet;
 use rapier_testbed3d::Testbed;
 use salva3d::integrations::rapier::{FluidsPipeline, FluidsTestbedPlugin};
-use salva3d::object::{Fluid};
+use salva3d::object::Fluid;
 use salva3d::solver::{Akinci2013SurfaceTension, XSPHViscosity};
 use std::f32;
 
@@ -39,7 +39,11 @@ pub fn init_world(testbed: &mut Testbed) {
     let wall_height = 0.;
     let subdiv = 4;
     let ground_size = Vector3::new(10., 1., 10.);
-    let subdivs = Vector3::new(ground_size.x as usize * subdiv, 0, ground_size.z as usize * subdiv);
+    let subdivs = Vector3::new(
+        ground_size.x as usize * subdiv,
+        0,
+        ground_size.z as usize * subdiv,
+    );
 
     let heights = DMatrix::from_fn(subdivs.x + 1, subdivs.z + 1, |i, j| {
         if i == 0 || i == subdivs.x || j == 0 || j == subdivs.z {
@@ -54,18 +58,19 @@ pub fn init_world(testbed: &mut Testbed) {
             (<f32 as ComplexField>::sin(x) + <f32 as ComplexField>::cos(z)) / 4.
         }
     });
-        let (ground_handle, _ground_shape) = heightfield::generate_ground(
-            ground_size,
-            heights,
-            PARTICLE_RADIUS,
-            &mut fluids_pipeline,
-            &mut bodies,
-            &mut colliders);
+    let (ground_handle, collider_handle) = heightfield::generate_ground(
+        ground_size,
+        heights,
+        PARTICLE_RADIUS,
+        &mut fluids_pipeline,
+        &mut bodies,
+        &mut colliders,
+    );
 
     // Callback that will be executed on the main loop to generate new particles every second.
     let mut last_t = 0.0;
 
-    plugin.add_callback(move |_, _, fluids_pipeline, run_state | {
+    plugin.add_callback(move |_, _, fluids_pipeline, run_state| {
         let fluid = fluids_pipeline
             .liquid_world
             .fluids_mut()
@@ -108,6 +113,7 @@ pub fn init_world(testbed: &mut Testbed) {
      */
     plugin.set_pipeline(fluids_pipeline);
     testbed.add_plugin(plugin);
+
     testbed.set_body_wireframe(ground_handle, true);
     testbed.set_world_with_gravity(bodies, colliders, joints, gravity);
     testbed.integration_parameters_mut().set_dt(1.0 / 200.0);

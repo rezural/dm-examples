@@ -1,18 +1,18 @@
-extern crate nalgebra as na;
-extern crate dm_examples;
-extern crate rapier3d;
-extern crate rapier_testbed3d;
 #[cfg(feature = "profile")]
 extern crate coarse_prof;
+extern crate dm_examples;
+extern crate nalgebra as na;
+extern crate rapier3d;
+extern crate rapier_testbed3d;
 
 use na::{Isometry3, Vector3};
-use ncollide3d::query::Ray;
+use parry3d::query::Ray;
 use rapier3d::dynamics::{JointSet, RigidBodySet};
-use rapier3d::geometry::{ColliderSet};
+use rapier3d::geometry::ColliderSet;
 use rapier_testbed3d::harness::{Harness, RunState};
 use salva3d::integrations::rapier::{FluidsHarnessPlugin, FluidsPipeline};
-use salva3d::object::{Fluid};
-use salva3d::solver::{XSPHViscosity};
+use salva3d::object::Fluid;
+use salva3d::solver::XSPHViscosity;
 use std::{f32, path::PathBuf};
 
 use dm_examples::generators::heightfield;
@@ -43,82 +43,89 @@ pub fn init_world(harness: &mut Harness) {
     let heightfield_file = String::from("assets/heightmaps/basicmulti.json");
     let heightfield_data = std::fs::read_to_string(heightfield_file).unwrap();
     let heightfield: Vec<Vec<f32>> = serde_json::from_str(heightfield_data.as_str()).unwrap();
-    
 
-    let mut heightfield_flattened: Vec<f32> = heightfield.clone()
-        .iter()
-        .flatten()
-        .cloned()
-        .collect();
-    
+    let mut heightfield_flattened: Vec<f32> =
+        heightfield.clone().iter().flatten().cloned().collect();
+
     heightfield_flattened.sort_by(|a, b| a.partial_cmp(b).unwrap());
     let highest_point = heightfield_flattened.last().unwrap().clone();
     let lowest_point = heightfield_flattened.first().unwrap().clone();
 
-    let heightfield_matrix = heightfield::dmatrix_from_heightfield(heightfield.clone(), lowest_point, height_multiplier);
+    let heightfield_matrix =
+        heightfield::dmatrix_from_heightfield(heightfield.clone(), lowest_point, height_multiplier);
 
-    let (_, ground_shape) = heightfield::generate_ground(
+    let (ground_handle, collider_handle) = heightfield::generate_ground(
         ground_size,
         heightfield_matrix,
         PARTICLE_RADIUS * 1.2,
         &mut fluids_pipeline,
         &mut bodies,
-        &mut colliders);
+        &mut colliders,
+    );
 
+    let ground_collider = colliders.get(collider_handle);
+    let ground_shape = ground_collider.unwrap().shape();
 
     let fg_extents = Vector3::new(3., 1., 3.);
-    let fluid_generator_pose = Isometry3::translation(-ground_size.x * 0.29, highest_point * ground_size.y - 5.5, -ground_size.z * 0.34);
+    let fluid_generator_pose = Isometry3::translation(
+        -ground_size.x * 0.29,
+        highest_point * ground_size.y - 5.5,
+        -ground_size.z * 0.34,
+    );
     // Callback that will be executed on the main loop to generate new particles every second.
     let mut last_t = -0.7;
-    
+
     let mut plugin = FluidsHarnessPlugin::new();
 
-    plugin.add_callback(move |_, _, fluids_pipeline: &mut FluidsPipeline, run_state: &RunState, _ | {
-        let fluid = fluids_pipeline
-            .liquid_world
-            .fluids_mut()
-            .get_mut(fluid_handle)
-            .unwrap();
+    plugin.add_callback(
+        move |_, _, fluids_pipeline: &mut FluidsPipeline, run_state: &RunState| {
+            let fluid = fluids_pipeline
+                .liquid_world
+                .fluids_mut()
+                .get_mut(fluid_handle)
+                .unwrap();
 
-        for i in 0..fluid.num_particles() {
-            if fluid.positions[i].y < CULL_PARTICLES_BELOW {
-                fluid.delete_particle_at_next_timestep(i);
+            for i in 0..fluid.num_particles() {
+                if fluid.positions[i].y < CULL_PARTICLES_BELOW {
+                    fluid.delete_particle_at_next_timestep(i);
+                }
             }
-        }
 
-        let t = run_state.time;
-        if t - last_t < 0.03 {
-            return;
-        }
+            let t = run_state.time;
+            if t - last_t < 0.03 {
+                return;
+            }
 
-        println!("{}", run_state.timestep_id);
-        last_t = t;
-        let mut particle_radius = PARTICLE_RADIUS;
-        let mut afg_extents = fg_extents.clone();
-        let pose = fluid_generator_pose.clone();
-        if run_state.timestep_id > 1 {
-            particle_radius = PARTICLE_RADIUS * 2.;
-            afg_extents.y /= 2.;
-        }
+            println!("{}", run_state.timestep_id);
+            last_t = t;
+            let mut particle_radius = PARTICLE_RADIUS;
+            let mut afg_extents = fg_extents.clone();
+            let pose = fluid_generator_pose.clone();
+            if run_state.timestep_id > 1 {
+                particle_radius = PARTICLE_RADIUS * 2.;
+                afg_extents.y /= 2.;
+            }
 
-        let volume = dm_examples::generators::fluid::volume_of_liquid(
-            afg_extents.x * 2., 
-            afg_extents.z * 2., 
-            afg_extents.y * 2., 
-            particle_radius, 
-            pose.translation, 
-            |point| {
-                let ray = Ray::new(point - Vector3::y() * (PARTICLE_RADIUS * 4.), -Vector3::y());
-                ground_shape.intersects_ray(&Isometry3::identity(), &ray, 10000.)
-            });
+            let volume = dm_examples::generators::fluid::volume_of_liquid(
+                afg_extents.x * 2.,
+                afg_extents.z * 2.,
+                afg_extents.y * 2.,
+                particle_radius,
+                pose.translation,
+                |point| {
+                    let ray =
+                        Ray::new(point - Vector3::y() * (PARTICLE_RADIUS * 4.), -Vector3::y());
+                    ground_shape.intersects_ray(&Isometry3::identity(), &ray, 10000.)
+                },
+            );
 
-        fluid.add_particles(&volume, None);
+            fluid.add_particles(&volume, None);
 
-        let to_file = format!("tmp/particles-{}.ply", run_state.timestep_id);
-        let to_file = PathBuf::from(to_file);
-        dm_examples::io::ply::output_particles_to_file(fluid, &to_file);
-
-    });
+            let to_file = format!("tmp/particles-{}.ply", run_state.timestep_id);
+            let to_file = PathBuf::from(to_file);
+            dm_examples::io::ply::output_particles_to_file(fluid, &to_file);
+        },
+    );
 
     /*
      * Set up the harness.
@@ -138,7 +145,6 @@ fn main() {
     #[cfg(feature = "profile")]
     coarse_prof::write(&mut std::io::stdout()).unwrap();
 }
-
 
 // fn main() {
 

@@ -691,10 +691,9 @@ dependencies = [
  "glob",
  "human-hash",
  "indicatif",
- "kiss3d",
  "meval",
- "nalgebra 0.23.2",
- "ncollide3d",
+ "nalgebra 0.24.1",
+ "parry3d 0.5.1",
  "ply-rs",
  "rand 0.7.3",
  "rapier3d",
@@ -747,7 +746,7 @@ dependencies = [
 name = "fibonacci_sphere"
 version = "0.1.0"
 dependencies = [
- "nalgebra 0.27.1",
+ "nalgebra 0.24.1",
 ]
 
 [[package]]
@@ -1110,9 +1109,9 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 
 [[package]]
 name = "kiss3d"
-version = "0.28.0"
+version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3e31ff4bc143721242cd722b93e09a7de3f6c20ddb66faeff7db2f6e0be90c7"
+checksum = "ea3ceea810808a08b17ec7922b41b662ba9f68c72471478c687928c7c0f76b84"
 dependencies = [
  "bitflags",
  "conrod_core",
@@ -1122,7 +1121,7 @@ dependencies = [
  "image",
  "instant",
  "libc",
- "nalgebra 0.23.2",
+ "nalgebra 0.24.1",
  "ncollide3d",
  "num-traits",
  "rusttype 0.8.3",
@@ -1146,9 +1145,9 @@ checksum = "830d08ce1d1d941e6b30645f1a0eb5643013d835ce3779a5fc208261dbe10f55"
 
 [[package]]
 name = "libc"
-version = "0.2.81"
+version = "0.2.97"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1482821306169ec4d07f6aca392a4681f66c75c9918aa49641a2595db64053cb"
+checksum = "12b8adadd720df158f4d70dfe7ccc6adb0472d7c55ca83445f6a5ab3e36f8fb6"
 
 [[package]]
 name = "libloading"
@@ -1355,9 +1354,9 @@ dependencies = [
 
 [[package]]
 name = "nalgebra"
-version = "0.23.2"
+version = "0.24.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9bd52e9c9922d5702d5c2a105ceacc3c1206e781d3d130f4d2b7ad5f43c144b"
+checksum = "1a9002895a0de45e3cde58b36d0cf2f83249e7dba4a43ee64dafbf01bfd464ff"
 dependencies = [
  "approx 0.4.0",
  "generic-array",
@@ -1401,18 +1400,17 @@ dependencies = [
 
 [[package]]
 name = "ncollide3d"
-version = "0.26.1"
+version = "0.27.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7fa86028ca1d3ac2ff5946c64e3f82fc6e9cdfaef2bef716f9fbf7e1559298ec"
+checksum = "cec38e4a4bb17b79282241731609307c50fa700cf8b0cbe53a90996a8a30d437"
 dependencies = [
  "approx 0.4.0",
  "bitflags",
  "downcast-rs",
  "either",
- "nalgebra 0.23.2",
+ "nalgebra 0.24.1",
  "num-traits",
  "petgraph 0.5.1",
- "serde",
  "simba 0.3.1",
  "slab",
  "slotmap",
@@ -1772,6 +1770,46 @@ dependencies = [
 ]
 
 [[package]]
+name = "parry3d"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fdb2522f252566f695839c0280aa478abf6dd6360fd4e729810b6bc635e8cf4e"
+dependencies = [
+ "approx 0.4.0",
+ "bitflags",
+ "downcast-rs",
+ "either",
+ "erased-serde",
+ "nalgebra 0.24.1",
+ "num-derive",
+ "num-traits",
+ "rustc-hash",
+ "serde",
+ "simba 0.3.1",
+ "slab",
+ "smallvec",
+]
+
+[[package]]
+name = "parry3d"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "70409213da33840548c12f25c6eb31e2d5af8156eae94472c105b5c4d09bd1e1"
+dependencies = [
+ "approx 0.5.0",
+ "bitflags",
+ "downcast-rs",
+ "either",
+ "nalgebra 0.27.1",
+ "num-derive",
+ "num-traits",
+ "rustc-hash",
+ "simba 0.5.1",
+ "slab",
+ "smallvec",
+]
+
+[[package]]
 name = "paste"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2120,7 +2158,9 @@ dependencies = [
 
 [[package]]
 name = "rapier3d"
-version = "0.4.2"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0f32c214cc33e884f3e52ba38cdf81c402cc984840be1bc69cbb5e47aefcae7"
 dependencies = [
  "approx 0.4.0",
  "arrayvec",
@@ -2131,10 +2171,10 @@ dependencies = [
  "erased-serde",
  "generational-arena",
  "instant",
- "nalgebra 0.23.2",
- "ncollide3d",
+ "nalgebra 0.24.1",
  "num-derive",
  "num-traits",
+ "parry3d 0.1.2",
  "rayon",
  "rustc-hash",
  "serde",
@@ -2144,19 +2184,21 @@ dependencies = [
 
 [[package]]
 name = "rapier_testbed3d"
-version = "0.4.0"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3c2897e44350ceac2cce57bb26ee7f16969015e3dd1520921d2cf11582bc6455"
 dependencies = [
  "Inflector",
  "bincode",
  "bitflags",
- "coarse-prof",
  "crossbeam",
  "instant",
  "kiss3d",
  "md5",
- "nalgebra 0.23.2",
+ "nalgebra 0.24.1",
  "ncollide3d",
  "num_cpus",
+ "parry3d 0.1.2",
  "rand 0.7.3",
  "rand_pcg 0.2.1",
  "rapier3d",
@@ -2304,7 +2346,7 @@ checksum = "71d301d4193d031abdd79ff7e3dd721168a9572ef3fe51a1517aba235bd8f86e"
 
 [[package]]
 name = "salva3d"
-version = "0.5.0"
+version = "0.6.0"
 dependencies = [
  "approx 0.4.0",
  "fnv",
@@ -2312,9 +2354,9 @@ dependencies = [
  "instant",
  "itertools",
  "kiss3d",
- "nalgebra 0.23.2",
- "ncollide3d",
+ "nalgebra 0.24.1",
  "num-traits",
+ "parry3d 0.1.2",
  "rapier3d",
  "rapier_testbed3d",
  "rayon",
@@ -2604,9 +2646,9 @@ checksum = "6446ced80d6c486436db5c078dde11a9f73d42b57fb273121e160b84f63d894c"
 
 [[package]]
 name = "syn"
-version = "1.0.67"
+version = "1.0.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6498a9efc342871f91cc2d0d694c674368b4ceb40f62b65a7a08c3792935e702"
+checksum = "f3a1d708c221c5a612956ef9f75b37e454e88d1f7b899fbd3a18d4252012d663"
 dependencies = [
  "proc-macro2 1.0.24",
  "quote 1.0.8",
@@ -2668,11 +2710,11 @@ dependencies = [
 
 [[package]]
 name = "thread_local"
-version = "1.0.1"
+version = "1.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d40c6d1b69745a6ec6fb1ca717914848da4b44ae29d9b3080cbee91d72a69b14"
+checksum = "8018d24e04c95ac8790716a5987d0fec4f8b27249ffa0f7d33f1369bdfb88cbd"
 dependencies = [
- "lazy_static",
+ "once_cell",
 ]
 
 [[package]]
