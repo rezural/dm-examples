@@ -2,8 +2,6 @@ extern crate dm_examples;
 extern crate nalgebra as na;
 
 use na::{ComplexField, DMatrix, Point3, Vector3};
-use rapier3d::dynamics::{JointSet, RigidBodySet};
-use rapier3d::geometry::ColliderSet;
 use rapier_testbed3d::{Testbed, TestbedApp};
 use salva3d::integrations::rapier::{FluidsPipeline, FluidsTestbedPlugin};
 use salva3d::object::Fluid;
@@ -11,6 +9,8 @@ use salva3d::solver::{Akinci2013SurfaceTension, XSPHViscosity};
 use std::f32;
 
 use dm_examples::generators::heightfield;
+use salva3d::rapier::prelude::JointSet;
+use salva3d::rapier::{dynamics::RigidBodySet, geometry::ColliderSet};
 
 const PARTICLE_RADIUS: f32 = 0.05;
 const SMOOTHING_FACTOR: f32 = 2.0;

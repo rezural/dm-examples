@@ -1,11 +1,11 @@
-use na::{DMatrix, Vector3};
-use rapier3d::{
-    dynamics::{RigidBodyBuilder, RigidBodyHandle, RigidBodySet},
-    geometry::{Collider, ColliderBuilder, ColliderHandle, ColliderSet, Shape},
-};
+use na::{DMatrix, Point3, Vector3};
 use salva3d::{
     integrations::rapier::{ColliderSampling, FluidsPipeline},
     object::Boundary,
+    rapier::{
+        dynamics::{RigidBodyBuilder, RigidBodyHandle, RigidBodySet},
+        geometry::{Collider, ColliderBuilder, ColliderHandle, ColliderSet, Shape},
+    },
 };
 
 pub fn dmatrix_from_heightfield(
@@ -36,8 +36,15 @@ pub fn generate_ground<'a>(
     // Setup the ground.
     let ground_handle = bodies.insert(RigidBodyBuilder::new_static().build());
     let ground_shape = ColliderBuilder::heightfield(heights, ground_size).build();
-    let ball_samples =
+    let mut ball_samples =
         salva3d::sampling::shape_surface_ray_sample(ground_shape.shape(), sample_radius).unwrap();
+
+    let shifted = ball_samples.clone();
+    let shifted = shifted
+        .iter()
+        .map(|&p| p + Vector3::new(0., -sample_radius * 2., 0.));
+
+    ball_samples.extend(shifted);
 
     let co_handle = colliders.insert_with_parent(ground_shape, ground_handle, bodies);
     let bo_handle = fluids_pipeline

@@ -8,10 +8,10 @@ extern crate rapier_testbed3d;
 use dm_examples::io::ply::output_particles_to_file;
 use dm_examples::run::Manager;
 use na::{Isometry3, Point3, Unit, Vector3};
-use rapier3d::dynamics::{JointSet, RigidBodySet};
-use rapier3d::geometry::ColliderSet;
 use rapier_testbed3d::harness::{Harness, RunState};
 use salva3d::object::Fluid;
+use salva3d::rapier::prelude::JointSet;
+use salva3d::rapier::{dynamics::RigidBodySet, geometry::ColliderSet};
 use salva3d::solver::XSPHViscosity;
 use salva3d::{
     integrations::rapier::{FluidsHarnessPlugin, FluidsPipeline},
@@ -70,13 +70,13 @@ pub fn init_world(harness: &mut Harness) {
                 .get(fluid_handle)
                 .unwrap();
 
-            println!("saving particles");
+            // println!("saving particles");
             let to_file = run
                 .particles_full_path()
                 .join(format!("particles-{}.ply", run_state.timestep_id));
             let to_file = PathBuf::from(to_file);
             output_particles_to_file(fluid, &to_file);
-            println!("done");
+            // println!("done");
         },
     );
 
@@ -115,7 +115,8 @@ impl NonPressureForce for CustomForceField {
         _densities: &[f32],
     ) {
         for (pos, acc) in fluid.positions.iter().zip(fluid.accelerations.iter_mut()) {
-            if let Some((dir, dist)) = Unit::try_new_and_get(self.origin - pos, 0.1) {
+            if let Some((_, dist)) = Unit::try_new_and_get(self.origin - pos, 0.1) {
+                let dir = Vector3::y_axis();
                 *acc += *dir / (dist / 10.);
             }
         }

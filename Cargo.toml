@@ -25,9 +25,10 @@ rand = "0.7.3"
 nalgebra = { version = "0.27", features = [ "serde-serialize" ] }
 parry3d = "0.5"
 
-salva3d = "0.6"
-rapier3d = "0.9"
-rapier_testbed3d = "0.9"
+salva3d = { path = "vendor/salva/build/salva3d" }
+rapier3d = { path = "vendor/rapier/build/rapier3d" }
+rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d/" }
+# rapier_testbed3d = "0.9"
 coarse-prof = { version = "0.2.4", optional = true}
 human-hash = "0.3.0"
 uuid = { version = "0.7.4", features = ["serde", "v4"] }
@@ -35,8 +36,8 @@ fibonacci_sphere = { path = "../fibonacci_sphere/" }
 
 [patch.crates-io]
 salva3d = { path = "vendor/salva/build/salva3d" }
-# rapier3d = { path = "vendor/rapier/build/rapier3d" }
-# rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d" }
+rapier3d = { path = "vendor/rapier/build/rapier3d" }
+rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d" }
 
 # rapier3d = { git = "https://github.com/dimforge/rapier", branch = "master"}
 # rapier_testbed3d = { git = "https://github.com/dimgorfe/rapier", branch = "master"}
