@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require 'pry'
+
+extents = [ARGV[0], ARGV[1], ARGV[2]].map(&:to_f)
+particle_radius = ARGV[3].to_f
+multiplier = (ARGV[4] || 1.0).to_f
+
+def num_particles(extents, particle_radius) 
+  particle_diam = particle_radius * 2
+  subdivs = extents.map {|extent| extent / particle_diam }
+  subdivs.reduce(1) {|memo, a| a * memo}
+end
+
+puts num_particles(extents, particle_radius) * multiplier

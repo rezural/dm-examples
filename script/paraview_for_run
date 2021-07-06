@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'fileutils'
+require 'pry'
+require 'erb'
+
+run_dir = Pathname.new ARGV[0].to_s
+
+current_dir = Pathname.new Dir.pwd
+
+paraview_source_file = current_dir.join("assets", "paraview.pvsm.erb")
+
+
+class Paraview
+    attr_reader :paraview_file, :particle_radius, :run_dir, :particle_files
+
+    def initialize(paraview_file, particle_radius, run_dir)
+        @paraview_file = paraview_file
+        @particle_radius = particle_radius
+        @run_dir = Pathname.new run_dir
+        self.populate_particle_files
+    end
+
+    def populate_particle_files
+        @particle_files = Dir[@run_dir.join("particles", "*.ply")]
+    end
+
+    def build
+        b = binding
+        erb_file = IO.read(@paraview_file)
+        ERB.new(erb_file).result b
+    end
+
+    def particle_files_xml
+        @particle_files.each_with_index.map {|file, i| "<Element index=\"#{i}\" value=\"#{file}\"/>"}.join("\n")
+    end
+
+    def timestep_values_xml
+        @particle_files.each_with_index.map {|file, i| "<Element index=\"#{i}\" value=\"#{i}\"/>"}.join("\n")
+
+    end
+end
+
+paraview = Paraview.new(paraview_source_file, "0.2", run_dir)
+
+puts paraview.build

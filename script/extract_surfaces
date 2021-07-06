@@ -6,23 +6,31 @@ require 'toml'
 require 'natural_sort_kernel'
 
 dir = Pathname.new ARGV[0].to_s
+from_subdir = ARGV[1].to_s
 # particle_radius = ARGV[1].to_s
 splash_surf_bin = "./splashsurf"
 particles_path = dir.join('particles')
 surfaces_path = dir.join('surfaces')
-# debug_output_dir = surfaces_path.join('verbose')
-# log_file = dir.join("splashsurf.log")
+debug_output_dir = surfaces_path.join('verbose')
+log_file = dir.join("splashsurf.log")
+
+particles_sub_path = particles_path.join(from_subdir)
+surfaces_sub_path = surfaces_path.join(from_subdir)
 
 config_file = dir.join("config.toml")
-config = TOML.load_file(config_file.to_s)
 
-particle_radius = (ARGV[2] || config["particle_radius"]).to_f
+if File.exist? config_file then
+    config = TOML.load_file(config_file.to_s)
+    particle_radius = config["particle_radius"].to_f
+end
 
-FileUtils.mkdir_p surfaces_path
+particle_radius = ARGV[2]
+
+FileUtils.mkdir_p surfaces_sub_path
 
 #just keep running
 loop do
-    input_files = Dir[particles_path.join('*.ply')]
+    input_files = Dir[particles_sub_path.join('*.ply')]
     input_files = input_files.natural_sort
 
     debug_options = ""
@@ -31,13 +39,17 @@ loop do
 
     input_files.each do |input_file|
         input_file_bare = File.basename input_file
-        output_file = surfaces_path.join("#{input_file_bare}.obj")
-        cmd = "#{splash_surf_bin} reconstruct -i #{input_file} -o #{output_file} --particle-radius=#{particle_radius * 1.0} --smoothing-length=2.0 --cube-size=1.5  --mt-particles --output-normals on #{debug_options}"
+        output_file = surfaces_sub_path.join("#{input_file_bare}.obj")
+        tmp_file = Tempfile.new("#{input_file_bare}").path
+        tmp_file = "#{tmp_file}.obj"
+        cmd = "#{splash_surf_bin} reconstruct -i #{input_file} -o #{tmp_file} --particle-radius=#{particle_radius * 1.0} --smoothing-length=2.0 --cube-size=1.5  --mt-particles on --output-normals on #{debug_options}"
         if !File.exists?(output_file)
-            # puts cmd
             puts "surfacing #{input_file} to #{output_file}"
-            # puts cmd
-            output = `#{cmd} `
+            puts cmd
+            output = `#{cmd} >> #{log_file}`
+            mv_cmd = "mv #{tmp_file} #{output_file}"
+            puts "Moving File #{mv_cmd}"
+            `#{mv_cmd}`
         end
     end
     puts "finished"

@@ -1,0 +1,40 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'fileutils'
+require 'pry'
+require 'toml'
+require 'peach'
+require 'natural_sort_kernel'
+
+run_dir = Pathname.new ARGV[0].to_s
+
+prune_particles_bin = "target/release/prune-particles"
+particles_path = run_dir.join('particles')
+particles_full_path = particles_path.join('full')
+particles_pruned_path = particles_path.join('pruned')
+log_file = run_dir.join("prune.log")
+
+config_file = run_dir.join("config.toml")
+config = TOML.load_file(config_file.to_s)
+
+particle_radius = (ARGV[1] || config["particle_radius"]).to_s
+
+input_files = Dir[particles_full_path.join('*.ply')]
+
+input_files = input_files.natural_sort
+
+commands = []
+
+input_files.each do |input_file|
+    input_file_bare = File.basename input_file
+    cmd = "#{prune_particles_bin} -i #{input_file} -c #{config_file}"
+    output_file = particles_pruned_path.join(input_file_bare)
+    if !File.exists?(output_file)
+        commands << cmd
+    end
+end
+
+commands.pmap(4) { |cmd|
+    puts "running command #{cmd}"
+    system(cmd)
+}

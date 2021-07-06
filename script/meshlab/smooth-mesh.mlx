@@ -1,0 +1,9 @@
+<!DOCTYPE FilterScript>
+<FilterScript>
+ <filter name="Laplacian Smooth">
+  <Param isxmlparam="0" type="RichInt" value="3" name="stepSmoothNum" description="Smoothing steps" tooltip="The number of times that the whole algorithm (normal smoothing + vertex fitting) is iterated."/>
+  <Param isxmlparam="0" type="RichBool" value="true" name="Boundary" description="1D Boundary Smoothing" tooltip="Smooth boundary edges only by themselves (e.g. the polyline forming the boundary of the mesh is independently smoothed). This can reduce the shrinking on the border but can have strange effects on very small boundaries."/>
+  <Param isxmlparam="0" type="RichBool" value="true" name="cotangentWeight" description="Cotangent weighting" tooltip="Use cotangent weighting scheme for the averaging of the position. Otherwise the simpler umbrella scheme (1 if the edge is present) is used."/>
+  <Param isxmlparam="0" type="RichBool" value="false" name="Selected" description="Affect only selection" tooltip="If checked the filter is performed only on the selected area"/>
+ </filter>
+</FilterScript>

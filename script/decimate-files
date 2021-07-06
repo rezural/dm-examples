@@ -1,0 +1,20 @@
+#!/usr/bin/env ruby
+
+# require 'path'
+require 'pathname'
+require 'fileutils'
+input_dir = Pathname.new(ARGV[0])
+output_dir = Pathname.new(ARGV[1])
+slice_size = ARGV[2].to_i
+glob = input_dir.join("*.obj")
+files = Dir["#{glob}"]
+
+FileUtils.mkdir_p output_dir
+
+files.each_slice(slice_size) do |files|
+    file = files.first
+    file_out = Pathname.new(file).basename
+    cmd = "cp #{file} #{output_dir.join(file_out).to_s}"
+    puts cmd
+    `#{cmd}`
+end

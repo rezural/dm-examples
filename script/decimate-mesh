@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'fileutils'
+require 'pry'
+require 'toml'
+require 'natural_sort_kernel'
+
+dir = Pathname.new ARGV[0].to_s
+from_subdir = ARGV[1].to_s
+surfaces_output = ARGV[2].to_s || "decimated"
+chunk_size = (ARGV[3] || "4").to_i
+# particle_radius = ARGV[1].to_s
+meshlab_bin = "meshlabserver"
+surfaces_path = dir.join('surfaces')
+log_file = dir.join("splashsurf.log")
+# puts "#{ARGV} #{chunk_size}"
+surfaces_sub_path = surfaces_path.join(from_subdir)
+surfaces_output_sub_path = surfaces_path.join(surfaces_output)
+
+puts surfaces_sub_path
+# config_file = dir.join("config.toml")
+# config = TOML.load_file(config_file.to_s)
+
+# particle_radius = (ARGV[2] || config["particle_radius"]).to_f
+
+FileUtils.mkdir_p surfaces_output_sub_path
+
+#just keep running
+loop do
+    input_files = Dir[surfaces_sub_path.join('*.obj')]
+    input_files = input_files.natural_sort
+    debug_options = ""
+
+    # puts input_files.inspect
+
+    input_files.each_slice(chunk_size) do |input_files_inner|
+        outer_cmd = []
+        # puts input_files_inner.inspect                                                                                    
+        input_files_inner.each do |input_file|
+            input_file_bare = File.basename input_file
+            output_file = surfaces_output_sub_path.join("#{input_file_bare}.stl")
+            tmp_file = Tempfile.new("#{input_file_bare}").path
+            tmp_file = "#{tmp_file}.stl"
+            cmd = "#{meshlab_bin} -i #{input_file} -o #{tmp_file}  -m vn -s script/meshlab/decimate-mesh.mlx"
+            if !File.exists?(output_file)
+                puts "decimating #{input_file} -> #{tmp_file} -> #{output_file}"
+                puts cmd
+                # output = `#{cmd}`
+                mv_cmd = "mv #{tmp_file} #{output_file}"
+                # puts "Moving File #{mv_cmd}"
+                # `#{mv_cmd}`
+                cmd = "(#{cmd} ; #{mv_cmd}) &"
+                outer_cmd << cmd
+            end
+        end
+        # puts outer_cmd.inspect
+        `#{outer_cmd.join(' ')}` unless outer_cmd.empty?
+
+    end
+    puts "finished"
+    sleep(10 * 1)
+    puts "retrying"
+end

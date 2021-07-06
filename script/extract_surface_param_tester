@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'fileutils'
+require 'pry'
+require 'toml'
+
+#file to work on
+input_file = Pathname.new ARGV[0].to_s
+output_dir = Pathname.new ARGV[1].to_s
+particle_radius = ARGV[2].to_s
+
+# particle_radius = ARGV[1].to_s
+splash_surf_bin = "../3rdparty/splashsurf/target/release/splashsurf"
+log_file = output_dir.join("splashsurf.log")
+
+# cube_sizes = [1.0, 1.5]
+# kernel_radiuses = [1.0, 1.5, 2.0, 2.5, 3.0]
+# surface_thresholds = [1.0, 1.5]
+
+cube_sizes = [1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+kernel_radiuses = [3.5, 4.0, 4.5, 5.0]
+surface_thresholds = [0.7, 0.8]
+
+args = []
+for cube_size in cube_sizes do
+    for kernel_radius in kernel_radiuses do
+        for surface_threshold in surface_thresholds do
+            args << ["--particle-radius=#{particle_radius} --cube-size=#{cube_size} --kernel-radius=#{kernel_radius} --surface-threshold=#{surface_threshold}", "#{particle_radius}-#{cube_size}-#{kernel_radius}-#{surface_threshold}"]
+        end
+    end
+end
+
+args.each do |arg|
+    cmd_args, file_details = arg
+    # puts "#{cmd_args}, #{file_details}"
+    input_file_name = File.basename input_file
+    output_file_name = "#{input_file_name}-\\(#{file_details}\\).vtk"
+    output_file = "#{output_dir}/#{output_file_name}"
+    cmd = "#{splash_surf_bin} #{input_file} -o #{output_file} --mt-particles #{cmd_args}"
+    puts "surfacing #{input_file} to #{output_file}"
+    puts cmd
+    output = `#{cmd} >> #{log_file}`
+
+end

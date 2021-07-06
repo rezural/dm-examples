@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'pry'
+dir = Pathname.new ARGV[0].to_s
+chunks =  ARGV[1].to_i
+
+particles_dir = dir.join('particles')
+files = Dir[particles_dir.join('*.ply').to_s]
+decimated = files.each_slice(chunks).map{|a| a.first}
+decimated.push files.last
+
+to_delete = files - decimated
+
+to_delete.each do |file|
+    cmd = "rm #{file}"
+    `#{cmd}`
+end

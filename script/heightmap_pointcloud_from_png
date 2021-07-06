@@ -1,0 +1,68 @@
+#!/usr/bin/env ruby
+require 'chunky_png'
+require 'pry'
+require 'json'
+
+if ARGV[0] == '-u' then
+    puts "args: <image_width_in_metres:f> <highest_point_of_reef:f> <stride:i> <filter_above:coefficient> <heightmap_file>"
+    exit
+end
+
+image_width = ARGV[0].to_f
+highest_point = ARGV[1].to_f
+stride = ARGV[2].to_i
+filter_above = ARGV[3].to_f
+heightmap_file = Pathname.new ARGV[4].to_s
+
+input = ChunkyPNG::Image.from_file(heightmap_file)
+ratio = (image_width / input.width) * stride
+heightmap = []
+
+(0..input.width-1).each_slice(stride) do |x|
+    line = []
+    (0..input.height-1).each_slice(stride) do |y|
+        #for some reason black is 255, not zero
+        colour = input.get_pixel(x.first, y.first) - 255
+        line << colour
+    end
+    heightmap << line
+end
+
+highest_point_in_img = heightmap.map{|line| line.max}.max.to_f
+lowest_point_in_img = heightmap.map{|line| line.min}.min.to_f
+
+filter_above = highest_point_in_img * filter_above
+
+filtered = heightmap.map {|line| line.map { |value|
+    value = lowest_point_in_img if value.nil?
+    value = filter_above if value > filter_above
+    value
+}}
+
+# invert the height map
+inverted = filtered.map { |line| line.map { |val| val * -1 + highest_point_in_img} }
+# inverted = filtered
+
+squish_ratio = highest_point / highest_point_in_img
+
+squished = inverted.map {|line| line.map {|pixel| pixel * squish_ratio}}
+
+num_points = squished.length * squished.first.length
+ply_header = <<-EOP
+ply
+format ascii 1.0
+element vertex #{num_points}
+property float x
+property float y
+property float z
+end_header
+EOP
+
+puts ply_header
+
+(0..squished.length-1).each do |x|
+    (0..squished.first.length-1).each do |z|
+        points = [x.to_f * ratio, squished[x][z], z.to_f * ratio]
+        puts points.join(' ') + "\n"
+    end
+end

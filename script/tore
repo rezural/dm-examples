@@ -1,0 +1,46 @@
+#!/usr/bin/env ruby
+require 'securerandom'
+require 'fileutils'
+require 'pathname'
+
+require 'listen'
+
+#TODO passthrough args
+
+uuid = SecureRandom.uuid
+run_dir = "runs/#{uuid}"
+run_dir = Pathname.new run_dir
+particles_dir = run_dir/"particles"
+
+FileUtils.mkdir_p particles_dir
+
+`ls #{particles_dir}`
+
+cmd = "cp test/fixtures/default.toml #{run_dir}/config.toml"
+`#{cmd}`
+cmd = "cp test/fixtures/salvatore.pvsm #{run_dir}/salvatore.pvsm"
+`#{cmd}`
+
+cmd = "RAYON_NUM_THREADS=6 cargo run --release -- --name #{uuid} --config #{run_dir}/config.toml"
+
+fork { exec(cmd) }
+
+have_output = false
+
+listener = Listen.to(particles_dir) do |modified, added, removed|
+    if !have_output then
+        if added.count > 0 then
+            have_output = true
+            sleep 5
+            puts "running paraview"
+            cmd = "paraview #{run_dir}/salvatore.pvsm"
+            fork { exec(cmd) }
+        end
+    end
+    have_output = true if added.count > 0
+end
+
+listener.start
+
+sleep
+

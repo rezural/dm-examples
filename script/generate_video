@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'fileutils'
+require 'humanhash'
+
+dir = Pathname.new ARGV[0].to_s
+
+render_path = dir.join('renders')
+video_path = dir.join('videos')
+
+particles_ffmpeg_glob = render_path.join('*.png').to_s
+
+FileUtils.mkdir_p render_path
+FileUtils.mkdir_p video_path
+
+ffmpeg_commands = [
+    "-r 20",
+    "-c:v libx264",
+    "-pix_fmt yuv420p",
+    "-g 30",
+    "-crf 18"
+].join(' ')
+
+human_hash = HumanHash.uuid.first
+output_file = "#{human_hash}.mp4"
+
+# puts "Outputting video: #{output_file}"
+cmd = "ffmpeg -pattern_type glob -i '#{particles_ffmpeg_glob}' #{ffmpeg_commands} #{video_path.to_s}/#{output_file}"
+# puts "#{cmd}"
+`#{cmd}`

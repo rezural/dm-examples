@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'pry'
+require 'listen'
+
+run_dir = Pathname.new ARGV[0].to_s
+
+particles_dir = run_dir.join('particles')
+
+listener = Listen.to(particles_dir.to_s) do |modified, added, removed|
+  puts "Change Detected, running extract_surfaces"
+  puts `./script/extract_surfaces #{run_dir.to_s}`
+end
+
+listener.start
+sleep

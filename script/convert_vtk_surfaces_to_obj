@@ -1,0 +1,35 @@
+#!/usr/bin/env ruby
+require 'pathname'
+require 'fileutils'
+require 'pry'
+require 'toml'
+
+splash_surf_bin = "./splashsurf"
+
+run_path = Pathname.new ARGV[0].to_s
+surfaces_path = run_path.join('surfaces')
+
+surfaces_path_input = (ARGV[1] || "full").to_s;
+surfaces_path_input = surfaces_path.join(surfaces_path_input)
+
+surfaces_obj_path = (ARGV[2] || 'obj')
+surfaces_obj_path = surfaces_path.join(surfaces_obj_path)
+
+puts surfaces_path_input
+loop do 
+    input_files = Dir[surfaces_path_input.join('*.vtk')]
+
+    FileUtils.mkdir_p surfaces_obj_path
+    
+    input_files.each do |vtk_file|
+        vtk_file_bare = File.basename vtk_file
+
+        output_file = surfaces_obj_path.join("#{vtk_file_bare}.obj")
+        
+        if (!File.exist?(output_file)) then
+            cmd = "#{splash_surf_bin} convert --mesh #{vtk_file} -o #{output_file} --output-normals on"
+            # puts "#{cmd}"
+            puts `#{cmd}`
+        end
+    end
+end
