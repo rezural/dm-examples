@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+particle_radius = ARGV[0] || "0.1"
+
+pids = []
+pids.push(Process.spawn "cargo run --release --features=parallel --bin landscape_harness")
+sleep 3
+run_dir = `ls -t runs|head -n 1`.split("\n").first
+puts run_dir
+
+extract_surfaces_cmd = "./script/extract_surfaces runs/#{run_dir}/ full #{particle_radius}"
+puts extract_surfaces_cmd
+pids.push(Process.spawn extract_surfaces_cmd)
+pids.push(Process.spawn "./script/decimate_mesh runs/#{run_dir}/ full decimated")
+puts "Press 'k' to kill processes"
+loop do
+    q = $stdin.sysread 1
+    if q == "k" then
+        puts "Killing"
+        puts pids.inspect
+        pids.each do |pid|
+            Process.kill "KILL", pid
+        end
+        exit
+    end
+end
