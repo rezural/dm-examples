@@ -5,8 +5,9 @@ authors = ["rezural <rezural@protonmail.com>"]
 edition = "2018"
 
 [features]
-default = [ "salva3d/sampling", "salva3d/rapier", "salva3d/rapier-harness" ]
-parallel = [ "salva3d/parallel", "rapier3d/parallel", "rapier_testbed3d/parallel" ]
+default = [ "salva3d/sampling", "salva3d/rapier" ]
+parallel = [ "salva3d/parallel", "rapier3d/parallel" ]
+# testbed = [ "rapier_testbed3d", ]
 # profile = [ "coarse-prof", "rapier_testbed3d/profile" ]
 
 [dependencies]
@@ -27,7 +28,7 @@ parry3d = "0.5"
 
 salva3d = { path = "vendor/salva/build/salva3d" }
 rapier3d = { path = "vendor/rapier/build/rapier3d" }
-rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d/" }
+# rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d/", optional = true }
 # rapier_testbed3d = "0.9"
 coarse-prof = { version = "0.2.4", optional = true}
 human-hash = "0.3.0"
@@ -37,7 +38,7 @@ fibonacci_sphere = { path = "../fibonacci_sphere/" }
 [patch.crates-io]
 salva3d = { path = "vendor/salva/build/salva3d" }
 rapier3d = { path = "vendor/rapier/build/rapier3d" }
-rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d" }
+# rapier_testbed3d = { path = "vendor/rapier/build/rapier_testbed3d" }
 
 # rapier3d = { git = "https://github.com/dimforge/rapier", branch = "master"}
 # rapier_testbed3d = { git = "https://github.com/dimgorfe/rapier", branch = "master"}

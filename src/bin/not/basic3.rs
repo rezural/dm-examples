@@ -1,12 +1,12 @@
 extern crate nalgebra as na;
 
 use dm_examples::generators;
-use dm_examples::io::ply::output_particles_to_file;
+use dm_examples::io::ply::output_fluid_to_file;
 use dm_examples::run::Manager;
 use na::{Isometry3, Point3, Translation3, Vector3};
 use parry3d::shape::SharedShape;
-use rapier_testbed3d::harness::RunState;
-use rapier_testbed3d::{Testbed, TestbedApp};
+use rapier::harness::RunState;
+// use rapier_testbed3d::{Testbed, TestbedApp};
 use salva3d::integrations::rapier::{ColliderSampling, FluidsPipeline, FluidsTestbedPlugin};
 use salva3d::object::{Boundary, Fluid};
 use salva3d::rapier::prelude::JointSet;
@@ -129,7 +129,7 @@ pub fn init_world(testbed: &mut Testbed) {
             .join(format!("particles-{}.ply", harness.state.timestep_id));
         let to_file = PathBuf::from(to_file);
         println!("{}", fluid.num_particles());
-        output_particles_to_file(fluid, &to_file);
+        output_fluid_to_file(fluid, &to_file);
         // println!("done");
     });
     /*
