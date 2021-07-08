@@ -32,7 +32,7 @@ pub fn generate_ground<'a>(
     fluids_pipeline: &mut FluidsPipeline,
     bodies: &mut RigidBodySet,
     colliders: &'a mut ColliderSet,
-) -> (RigidBodyHandle, ColliderHandle) {
+) -> (RigidBodyHandle, Vec<Point3<f32>>) {
     // Setup the ground.
     let ground_handle = bodies.insert(RigidBodyBuilder::new_static().build());
     let ground_shape = ColliderBuilder::heightfield(heights, ground_size).build();
@@ -54,8 +54,8 @@ pub fn generate_ground<'a>(
     fluids_pipeline.coupling.register_coupling(
         bo_handle,
         co_handle,
-        ColliderSampling::StaticSampling(ball_samples),
+        ColliderSampling::StaticSampling(ball_samples.clone()),
     );
 
-    (ground_handle, co_handle)
+    (ground_handle, ball_samples)
 }
